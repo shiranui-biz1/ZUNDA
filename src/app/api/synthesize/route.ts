@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const VOICEVOX_URL = process.env.VOICEVOX_API_URL ?? "http://localhost:50021";
+const VOICEVOX_URL =
+  process.env.VOICEVOX_API_URL ??
+  "https://api.tts.quest/v3/voicevox/synthesis";
 const SPEAKER_ID = 3; // ずんだもん（ノーマル）
+const POLL_INTERVAL_MS = 1000;
+const MAX_POLLS = 30;
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,39 +15,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "テキストが必要です" }, { status: 400 });
     }
 
-    // 1. 音声クエリを生成
-    const queryRes = await fetch(
-      `${VOICEVOX_URL}/audio_query?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}`,
-      { method: "POST" }
+    // 1. 合成リクエスト送信
+    const synthRes = await fetch(
+      `${VOICEVOX_URL}?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}`
     );
 
-    if (!queryRes.ok) {
-      throw new Error(`audio_query failed: ${queryRes.status}`);
+    if (!synthRes.ok) {
+      throw new Error(`synthesis request failed: ${synthRes.status}`);
     }
 
-    const query = await queryRes.json();
+    const synthData = await synthRes.json();
 
-    // 2. 音声合成
-    const synthesisRes = await fetch(
-      `${VOICEVOX_URL}/synthesis?speaker=${SPEAKER_ID}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(query),
+    if (!synthData.success) {
+      if (synthData.retryAfter) {
+        return NextResponse.json(
+          { error: `レート制限中です。${synthData.retryAfter}秒後に再試行してください` },
+          { status: 429 }
+        );
       }
-    );
-
-    if (!synthesisRes.ok) {
-      throw new Error(`synthesis failed: ${synthesisRes.status}`);
+      throw new Error("synthesis request failed");
     }
 
-    const audioBuffer = await synthesisRes.arrayBuffer();
+    // 2. 音声生成完了をポーリングで待機
+    const { audioStatusUrl, wavDownloadUrl } = synthData;
 
-    return new NextResponse(audioBuffer, {
-      headers: {
-        "Content-Type": "audio/wav",
-      },
-    });
+    for (let i = 0; i < MAX_POLLS; i++) {
+      const statusRes = await fetch(audioStatusUrl);
+      const status = await statusRes.json();
+
+      if (status.isAudioError) {
+        throw new Error("音声生成でエラーが発生しました");
+      }
+
+      if (status.isAudioReady) {
+        // 3. WAV をダウンロードして返す
+        const wavRes = await fetch(wavDownloadUrl);
+        if (!wavRes.ok) {
+          throw new Error(`WAV download failed: ${wavRes.status}`);
+        }
+
+        const audioBuffer = await wavRes.arrayBuffer();
+        return new NextResponse(audioBuffer, {
+          headers: { "Content-Type": "audio/wav" },
+        });
+      }
+
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    }
+
+    throw new Error("音声生成がタイムアウトしました");
   } catch (error) {
     console.error("Synthesize error:", error);
     return NextResponse.json({ error: "音声合成に失敗しました" }, { status: 500 });
