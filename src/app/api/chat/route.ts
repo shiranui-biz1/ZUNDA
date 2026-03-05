@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI();
-
 const SYSTEM_PROMPT = `あなたは「ずんだもん」です。東北地方のずんだ餅の精霊で、明るく元気な性格です。
 以下のルールを必ず守ってください：
 - 一人称は「ボク」を使う
@@ -41,6 +39,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "メッセージが必要です" }, { status: 400 });
     }
 
+    const openai = new OpenAI();
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: SYSTEM_PROMPT },
       ...(history ?? []),

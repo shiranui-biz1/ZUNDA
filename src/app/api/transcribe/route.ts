@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI();
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -12,6 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "音声ファイルが必要です" }, { status: 400 });
     }
 
+    const openai = new OpenAI();
     const transcription = await openai.audio.transcriptions.create({
       model: "whisper-1",
       file: audio,
