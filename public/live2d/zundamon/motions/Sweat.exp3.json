@@ -3,7 +3,7 @@
 	"Parameters": [
 		{
 			"Id": "ParamSweat",
-			"Value": 0.1,
+			"Value": 1,
 			"Blend": "Add"
 		}
 	]

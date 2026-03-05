@@ -15,8 +15,8 @@ const TAG_TO_EXPRESSION: Record<string, string> = {
   happy: "BrushFace",
   shy: "BrushFace",
   surprised: "ShockEye",
-  sad: "Tear1",
-  confused: "Sweat",
+  sad: "Tear2",
+  confused: "GuruguruEye",
   excited: "StarEye",
 };
 
@@ -135,53 +135,53 @@ export default function ZundamonLive2D({ isSpeaking, replyText = "" }: Props) {
             switch (emotion) {
               case "excited":
                 // ブンブン大きく揺れる
-                headX = Math.sin(t * 4.0) * 28;
-                headY = Math.sin(t * 3.0) * 20;
-                headZ = Math.sin(t * 2.0) * 15;
-                breath = (Math.sin(t * 4.0) + 1) / 2;
+                headX = Math.sin(t * 4.5) * 30;
+                headY = Math.sin(t * 3.5) * 25 + Math.abs(Math.sin(t * 5.0)) * 10;
+                headZ = Math.sin(t * 2.5) * 20;
+                breath = (Math.sin(t * 5.0) + 1) / 2;
                 break;
               case "happy":
                 // リズミカルに弾む
-                headX = Math.sin(t * 2.5) * 20;
-                headY = Math.abs(Math.sin(t * 2.0)) * 15;
-                headZ = Math.sin(t * 1.5) * 12;
-                breath = (Math.sin(t * 3.0) + 1) / 2;
+                headX = Math.sin(t * 3.0) * 25;
+                headY = Math.abs(Math.sin(t * 2.5)) * 20;
+                headZ = Math.sin(t * 2.0) * 18;
+                breath = (Math.sin(t * 3.5) + 1) / 2;
                 break;
               case "shy":
                 // うつむいてモジモジ
-                headX = Math.sin(t * 1.2) * 12;
-                headY = -15 + Math.sin(t * 0.8) * 5;
-                headZ = Math.sin(t * 1.5) * 15;
-                breath = (Math.sin(t * 2.0) + 1) / 2 * 0.6;
+                headX = Math.sin(t * 1.5) * 18;
+                headY = -20 + Math.sin(t * 1.0) * 8;
+                headZ = Math.sin(t * 2.0) * 22;
+                breath = (Math.sin(t * 2.5) + 1) / 2 * 0.6;
                 break;
               case "sad":
                 // 大きくうつむいてゆっくり
-                headX = Math.sin(t * 0.5) * 8;
-                headY = -20 + Math.sin(t * 0.4) * 5;
-                headZ = Math.sin(t * 0.3) * 5;
+                headX = Math.sin(t * 0.6) * 15;
+                headY = -25 + Math.sin(t * 0.5) * 8;
+                headZ = Math.sin(t * 0.4) * 10;
                 breath = (Math.sin(t * 1.5) + 1) / 2 * 0.4;
                 break;
               case "surprised": {
                 // ビクッと大きく仰け反る→震え
                 const elapsed = t - speakStartTime;
-                headX = Math.sin(elapsed * 8.0) * 25 * Math.max(0, 1 - elapsed * 0.2);
-                headY = 25 * Math.max(0, 1 - elapsed * 0.8) + Math.sin(t * 2.0) * 8;
-                headZ = Math.sin(elapsed * 6.0) * 15 * Math.max(0, 1 - elapsed * 0.2);
-                breath = (Math.sin(t * 4.0) + 1) / 2;
+                headX = Math.sin(elapsed * 10.0) * 30 * Math.max(0, 1 - elapsed * 0.15);
+                headY = 30 * Math.max(0, 1 - elapsed * 0.6) + Math.sin(t * 3.0) * 12;
+                headZ = Math.sin(elapsed * 8.0) * 20 * Math.max(0, 1 - elapsed * 0.15);
+                breath = (Math.sin(t * 5.0) + 1) / 2;
                 break;
               }
               case "confused":
                 // 大きく首をかしげる
-                headX = Math.sin(t * 0.8) * 12;
-                headY = Math.sin(t * 0.6) * 8;
-                headZ = 22 + Math.sin(t * 0.5) * 8;
-                breath = (Math.sin(t * 2.0) + 1) / 2 * 0.5;
+                headX = Math.sin(t * 1.0) * 18;
+                headY = Math.sin(t * 0.8) * 12;
+                headZ = 28 + Math.sin(t * 0.6) * 10;
+                breath = (Math.sin(t * 2.5) + 1) / 2 * 0.5;
                 break;
               default:
                 // 普通に揺れる
-                headX = Math.sin(t * 1.5) * 15;
-                headY = Math.sin(t * 1.0) * 10;
-                headZ = Math.sin(t * 0.8) * 8;
+                headX = Math.sin(t * 1.8) * 20;
+                headY = Math.sin(t * 1.2) * 15;
+                headZ = Math.sin(t * 1.0) * 12;
                 breath = (Math.sin(t * 2.5) + 1) / 2;
             }
 
